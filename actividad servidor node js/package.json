@@ -1,0 +1,19 @@
+{
+  "name": "actividad-1-servidor-nodejs",
+  "version": "1.0.0",
+  "description": "Servidor web básico desarrollado con Node.js que maneja peticiones HTTP y genera respuestas dinámicas.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "nodejs",
+    "http",
+    "server",
+    "backend",
+    "bootcamp"
+  ],
+  "author": "",
+  "license": "ISC"
+}
