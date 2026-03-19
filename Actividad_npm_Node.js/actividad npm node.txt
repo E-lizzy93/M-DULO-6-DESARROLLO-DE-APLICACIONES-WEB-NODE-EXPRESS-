@@ -1,0 +1,14 @@
+==========================================================
+ENTREGA MÓDULO 6: DESARROLLO DE APLICACIONES WEB
+==========================================================
+----------------------------------------------------------
+Actividad- Servidor Web en Node (JSON) + Cliente REST: Gestión de Productos
+----------------------------------------------------------
+
+REPOSITORIO GITHUB: 
+🔗 https://github.com/E-lizzy93/M-DULO-6-DESARROLLO-DE-APLICACIONES-WEB-NODE-EXPRESS-
+
+- Carpeta: Actividad_npm_Node.js donde están 
+-/app.js
+-/package-lock.json
+-/package.json

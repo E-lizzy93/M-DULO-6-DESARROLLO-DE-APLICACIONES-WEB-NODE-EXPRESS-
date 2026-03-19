@@ -1,0 +1,13 @@
+{
+  "name": "minishop",
+  "version": "1.0.0",
+  "description": "Tienda ficticia con Express y Handlebars",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "express-handlebars": "^7.1.2"
+  }
+}

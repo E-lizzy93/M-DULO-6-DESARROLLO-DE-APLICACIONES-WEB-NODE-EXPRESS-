@@ -1,0 +1,20 @@
+<div class="hero">
+  <h1>{{mayusculas nombreTienda}}</h1>
+  <p>{{bienvenida}}</p>
+</div>
+
+<h2>Nuestros Productos</h2>
+<div class="productos-grid">
+  {{#each productos}}
+    <div class="producto-card">
+      <img src="{{imagen}}" alt="{{nombre}}">
+      <h3>{{nombre}}</h3>
+      <p class="precio">\${{precio}}</p>
+      {{#if disponible}}
+        <span class="badge en-stock">En stock</span>
+      {{else}}
+        <span class="badge agotado">Agotado</span>
+      {{/if}}
+    </div>
+  {{/each}}
+</div>
