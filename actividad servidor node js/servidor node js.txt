@@ -1,0 +1,12 @@
+Entregable: Actividad - Desarrollo de Servidor Web Básico con Node.js
+
+Repositorio GitHub:
+🔗 https://github.com/E-lizzy93/M-DULO-6-DESARROLLO-DE-APLICACIONES-WEB-NODE-EXPRESS-.git
+
+Instrucciones de revisión:
+
+Código Fuente: Se encuentra en la carpeta /actividad servidor node js.
+
+Evidencias: Los pantallazos de las pruebas (GET, PUT, POST) están en /actividad servidor node js/img_servidor nodejs.
+
+Ejecución: El archivo principal es server.js y se inicia con el comando node server.js.
