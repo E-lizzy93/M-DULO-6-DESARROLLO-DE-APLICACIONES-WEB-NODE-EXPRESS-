@@ -1,0 +1,17 @@
+{
+  "name": "m6-ejercicio3-npm",
+  "version": "1.0.0",
+  "description": "Aplicación Node.js con chalk y dayjs",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "chalk": "4.1.2",
+    "dayjs": "^1.11.19"
+  }
+}

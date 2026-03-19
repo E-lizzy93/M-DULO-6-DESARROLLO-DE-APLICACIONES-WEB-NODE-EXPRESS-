@@ -1,0 +1,15 @@
+==========================================================
+ENTREGA MÓDULO 6: DESARROLLO DE APLICACIONES WEB
+==========================================================
+----------------------------------------------------------
+PROYECTO 2: API REST y SQL (Express + PostgreSQL)
+----------------------------------------------------------
+
+REPOSITORIO GITHUB: 
+🔗 https://github.com/E-lizzy93/M-DULO-6-DESARROLLO-DE-APLICACIONES-WEB-NODE-EXPRESS-
+
+- Carpeta: /M6-ejercicio2-express-sql-conductores
+- Archivo principal: server.js
+- Frontend: Carpeta /public (HTML, CSS, JS)
+- Base de Datos: Script en /database/actividad2.sql
+- Comando: node server.js
