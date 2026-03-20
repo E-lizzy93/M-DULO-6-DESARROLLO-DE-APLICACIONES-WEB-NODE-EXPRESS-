@@ -1,0 +1,9 @@
+{
+  "name": "actividad7-netflix",
+  "version": "1.0.0",
+  "description": "Catálogo de películas y series estilo Netflix",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  }
+}

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Catálogo Netflix</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; background: #141414; color: #fff; padding: 30px; }
+    h1 { color: #e50914; margin-bottom: 20px; }
+    h2 { margin: 20px 0 10px; color: #e50914; }
+
+    .botones { display: flex; gap: 10px; margin-bottom: 20px; }
+    button {
+      padding: 10px 20px; background: #e50914; color: white;
+      border: none; border-radius: 4px; cursor: pointer; font-size: 1rem;
+    }
+    button:hover { background: #b0060f; }
+    button.secundario { background: #333; }
+    button.secundario:hover { background: #555; }
+
+    /* Ordenamiento */
+    .orden { margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+    .orden label { color: #aaa; }
+    .orden select {
+      padding: 6px 10px; background: #333; color: white;
+      border: 1px solid #555; border-radius: 4px;
+    }
+
+    /* Tabla */
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th { background: #e50914; padding: 10px; text-align: left; }
+    td { padding: 10px; border-bottom: 1px solid #333; }
+    tr:hover { background: #1f1f1f; }
+    .btn-eliminar {
+      padding: 4px 10px; background: #555; font-size: 0.85rem;
+    }
+
+    /* Formularios */
+    .formularios { display: flex; gap: 30px; flex-wrap: wrap; margin-top: 30px; }
+    .form-card {
+      background: #1f1f1f; padding: 20px; border-radius: 8px;
+      flex: 1; min-width: 280px;
+    }
+    .form-card input {
+      display: block; width: 100%; padding: 8px; margin: 8px 0;
+      background: #333; color: white; border: 1px solid #555;
+      border-radius: 4px; font-size: 1rem;
+    }
+    .mensaje { margin-top: 15px; padding: 10px; border-radius: 4px; display: none; }
+    .mensaje.ok    { background: #1a4a1a; color: #4caf50; display: block; }
+    .mensaje.error { background: #4a1a1a; color: #f44336; display: block; }
+  </style>
+</head>
+<body>
+
+  <h1>🎬 Catálogo Netflix</h1>
+
+  <!-- Botones principales -->
+  <div class="botones">
+    <button onclick="cargarLista('peliculas')">🎥 LISTA DE PELÍCULAS</button>
+    <button onclick="cargarLista('series')">📺 LISTA DE SERIES</button>
+  </div>
+
+  <!-- Ordenamiento -->
+  <div class="orden" id="seccionOrden" style="display:none">
+    <label>Ordenar por:</label>
+    <select id="criterioOrden" onchange="ordenarLista()">
+      <option value="nombre">Nombre</option>
+      <option value="anio">Año</option>
+      <option value="director">Director (solo películas)</option>
+      <option value="temporadas">Temporadas (solo series)</option>
+    </select>
+  </div>
+
+  <!-- Tabla de resultados -->
+  <div id="resultado"></div>
+
+  <!-- Formularios -->
+  <div class="formularios">
+
+    <!-- Formulario Película -->
+    <div class="form-card">
+      <h2>➕ Agregar Película</h2>
+      <input type="text" id="pel-nombre"   placeholder="Nombre">
+      <input type="text" id="pel-director" placeholder="Director">
+      <input type="number" id="pel-anio"   placeholder="Año de estreno">
+      <button onclick="agregarPelicula()">AGREGAR NUEVA PELÍCULA</button>
+      <div class="mensaje" id="msg-pelicula"></div>
+    </div>
+
+    <!-- Formulario Serie -->
+    <div class="form-card">
+      <h2>➕ Agregar Serie</h2>
+      <input type="text"   id="ser-nombre"     placeholder="Nombre">
+      <input type="number" id="ser-anio"        placeholder="Año de estreno">
+      <input type="number" id="ser-temporadas"  placeholder="Número de temporadas">
+      <button onclick="agregarSerie()">AGREGAR NUEVA SERIE</button>
+      <div class="mensaje" id="msg-serie"></div>
+    </div>
+
+  </div>
+
+<script>
+  let tipoActual = '';  // 'peliculas' o 'series'
+  let datosActuales = []; // datos cargados actualmente
+
+  // ── Cargar lista (GET) ───────────────────────────────────────────────────
+  async function cargarLista(tipo) {
+    tipoActual = tipo;
+    try {
+      const res  = await fetch(`/catalogo?tipo=${tipo}`);
+      const data = await res.json();
+      datosActuales = data;
+      document.getElementById('seccionOrden').style.display = 'flex';
+      mostrarTabla(datosActuales, tipo);
+    } catch (err) {
+      document.getElementById('resultado').innerHTML = '<p style="color:red">Error al cargar la lista</p>';
+    }
+  }
+
+  // ── Mostrar tabla en el DOM ──────────────────────────────────────────────
+  function mostrarTabla(datos, tipo) {
+    if (datos.length === 0) {
+      document.getElementById('resultado').innerHTML = '<p>No hay elementos.</p>';
+      return;
+    }
+
+    let html = '<table>';
+
+    if (tipo === 'peliculas') {
+      html += '<tr><th>Nombre</th><th>Director</th><th>Año</th><th>Acción</th></tr>';
+      datos.forEach(p => {
+        html += `<tr>
+          <td>${p.nombre}</td>
+          <td>${p.director}</td>
+          <td>${p.anio}</td>
+          <td><button class="btn-eliminar secundario" onclick="eliminar('${p.nombre}', 'peliculas')">🗑 Eliminar</button></td>
+        </tr>`;
+      });
+    } else {
+      html += '<tr><th>Nombre</th><th>Año</th><th>Temporadas</th><th>Acción</th></tr>';
+      datos.forEach(s => {
+        html += `<tr>
+          <td>${s.nombre}</td>
+          <td>${s.anio}</td>
+          <td>${s.temporadas}</td>
+          <td><button class="btn-eliminar secundario" onclick="eliminar('${s.nombre}', 'series')">🗑 Eliminar</button></td>
+        </tr>`;
+      });
+    }
+
+    html += '</table>';
+    document.getElementById('resultado').innerHTML = html;
+  }
+
+  // ── Ordenar lista ────────────────────────────────────────────────────────
+  function ordenarLista() {
+    const criterio = document.getElementById('criterioOrden').value;
+    const ordenados = [...datosActuales].sort((a, b) => {
+      const valA = a[criterio] || '';
+      const valB = b[criterio] || '';
+      // Si es número, comparar como número
+      if (!isNaN(valA) && !isNaN(valB)) return Number(valA) - Number(valB);
+      return valA.toString().localeCompare(valB.toString());
+    });
+    mostrarTabla(ordenados, tipoActual);
+  }
+
+  // ── Agregar película (POST) ──────────────────────────────────────────────
+  async function agregarPelicula() {
+    const nombre   = document.getElementById('pel-nombre').value.trim();
+    const director = document.getElementById('pel-director').value.trim();
+    const anio     = document.getElementById('pel-anio').value.trim();
+    const msgEl    = document.getElementById('msg-pelicula');
+
+    if (!nombre || !director || !anio) {
+      mostrarMensaje(msgEl, 'Completa todos los campos', 'error');
+      return;
+    }
+
+    try {
+      const res = await fetch('/catalogo?tipo=peliculas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre, director, anio })
+      });
+      const data = await res.json();
+      mostrarMensaje(msgEl, data.mensaje || data.error, res.ok ? 'ok' : 'error');
+      if (res.ok) {
+        // Limpiar campos y recargar lista si está visible
+        document.getElementById('pel-nombre').value = '';
+        document.getElementById('pel-director').value = '';
+        document.getElementById('pel-anio').value = '';
+        if (tipoActual === 'peliculas') cargarLista('peliculas');
+      }
+    } catch (err) {
+      mostrarMensaje(msgEl, 'Error de conexión', 'error');
+    }
+  }
+
+  // ── Agregar serie (POST) ─────────────────────────────────────────────────
+  async function agregarSerie() {
+    const nombre     = document.getElementById('ser-nombre').value.trim();
+    const anio       = document.getElementById('ser-anio').value.trim();
+    const temporadas = document.getElementById('ser-temporadas').value.trim();
+    const msgEl      = document.getElementById('msg-serie');
+
+    if (!nombre || !anio || !temporadas) {
+      mostrarMensaje(msgEl, 'Completa todos los campos', 'error');
+      return;
+    }
+
+    try {
+      const res = await fetch('/catalogo?tipo=series', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre, anio, temporadas })
+      });
+      const data = await res.json();
+      mostrarMensaje(msgEl, data.mensaje || data.error, res.ok ? 'ok' : 'error');
+      if (res.ok) {
+        document.getElementById('ser-nombre').value = '';
+        document.getElementById('ser-anio').value = '';
+        document.getElementById('ser-temporadas').value = '';
+        if (tipoActual === 'series') cargarLista('series');
+      }
+    } catch (err) {
+      mostrarMensaje(msgEl, 'Error de conexión', 'error');
+    }
+  }
+
+  // ── Eliminar (DELETE) ────────────────────────────────────────────────────
+  async function eliminar(nombre, tipo) {
+    if (!confirm(`¿Eliminar "${nombre}"?`)) return;
+
+    try {
+      const res  = await fetch(`/catalogo?tipo=${tipo}&nombre=${encodeURIComponent(nombre)}`, {
+        method: 'DELETE'
+      });
+      const data = await res.json();
+      alert(data.mensaje || data.error);
+      cargarLista(tipo); // recargar lista
+    } catch (err) {
+      alert('Error de conexión');
+    }
+  }
+
+  // ── Mostrar mensaje de éxito o error ─────────────────────────────────────
+  function mostrarMensaje(el, texto, tipo) {
+    el.textContent = texto;
+    el.className = `mensaje ${tipo}`;
+    setTimeout(() => { el.className = 'mensaje'; }, 3000);
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,19 @@
+NTREGA MÓDULO 6: DESARROLLO DE APLICACIONES WEB
+
+📂 Proyecto: Catálogo Netflix — Clases + API REST
+
+REPOSITORIO GITHUB: 🔗 https://github.com/E-lizzy93/M-DULO-6-DESARROLLO-DE-APLICACIONES-WEB-NODE-EXPRESS-
+
+Carpeta: /Catalogo_Netflix_con_clases_PELICULA_y_SERIES-main
+
+Estructura del Proyecto:
+
+/models: Contiene las definiciones de las clases Pelicula y Serie en archivos JavaScript independientes para aplicar Programación Orientada a Objetos (POO).
+
+/public: Archivos estáticos (HTML, CSS, JS) que conforman la interfaz de usuario y consumen la API.
+
+peliculas.txt / series.txt: Archivos de texto plano que funcionan como fuente de datos para simular persistencia.
+
+server.js: Servidor principal desarrollado con Express que gestiona las rutas de la API y sirve el contenido estático.
+
+package.json: Registro de dependencias necesarias para el funcionamiento del servidor y scripts de ejecución.
