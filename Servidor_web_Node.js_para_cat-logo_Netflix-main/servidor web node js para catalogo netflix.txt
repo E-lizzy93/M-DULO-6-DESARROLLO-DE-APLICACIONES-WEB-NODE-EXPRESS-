@@ -1,0 +1,20 @@
+ENTREGA MÓDULO 6: DESARROLLO DE APLICACIONES WEB
+📂 Proyecto: 
+Ejercicio Práctico - Servidor web en Node-2
+
+
+REPOSITORIO GITHUB: 🔗 https://github.com/E-lizzy93/M-DULO-6-DESARROLLO-DE-APLICACIONES-WEB-NODE-EXPRESS-
+
+Carpeta: /Servidor_web_Node.js_para_cat-logo_Netflix-main
+
+Estructura del Proyecto:
+
+/public: Contiene los archivos del cliente web (HTML, CSS y JS) que interactúan con la API para visualizar el catálogo de películas y series.
+
+server.js: Archivo principal del servidor desarrollado con Node.js y Express que gestiona las rutas de la API REST.
+
+peliculas.txt / series.txt: Archivos utilizados para el almacenamiento y lectura de datos del catálogo.
+
+package.json: Configuración de dependencias del proyecto y scripts de ejecución de NPM.
+
+README.md: Documentación detallada del funcionamiento y los endpoints de la aplicación.
