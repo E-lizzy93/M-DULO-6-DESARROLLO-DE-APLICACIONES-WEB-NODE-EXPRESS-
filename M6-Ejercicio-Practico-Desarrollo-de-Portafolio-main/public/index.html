@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Tienda </title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<!-- ── Navbar ──────────────────────────────────────────────────────────── -->
+<nav>
+  <div class="logo">MI<span>TIENDA</span></div>
+  <div class="nav-links">
+    <button class="nav-link activo" onclick="mostrarVista('productos')">Productos</button>
+    <button class="nav-link"       onclick="mostrarVista('carrito')">Carrito</button>
+    <button class="carrito-btn"    onclick="mostrarVista('carrito')">
+      🛒 Carrito
+      <span class="carrito-count" id="carrito-count">0</span>
+    </button>
+  </div>
+</nav>
+
+<!-- ── VISTA: Productos ─────────────────────────────────────────────────── -->
+<div class="vista activa" id="vista-productos">
+  <div style="padding: 40px;">
+    <div class="hero">
+      <span class="hero-tag">Bienvenidos</span>
+      <h1>Ropa para<br>cada momento.</h1>
+      <p>Descubre nuestra colección y agrega tus favoritos al carrito.</p>
+    </div>
+
+    <div class="productos-header">
+      <h2>Todos los productos</h2>
+    </div>
+
+    <div class="grid-productos" id="grid-productos">
+      <div class="loading">Cargando productos...</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── VISTA: Carrito ───────────────────────────────────────────────────── -->
+<div class="vista" id="vista-carrito">
+  <div style="padding: 40px; max-width: 860px; margin: 0 auto;">
+    <h2 class="seccion-titulo">Carrito de compras</h2>
+    <div id="contenido-carrito"></div>
+  </div>
+</div>
+
+<!-- ── VISTA: Confirmación ──────────────────────────────────────────────── -->
+<div class="vista" id="vista-confirmacion">
+  <div style="padding: 40px; max-width: 760px; margin: 0 auto;">
+    <h2 class="seccion-titulo">Compra realizada</h2>
+    <div id="contenido-confirmacion"></div>
+  </div>
+</div>
+
+<!-- ── Toast ────────────────────────────────────────────────────────────── -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── Estado de la app ─────────────────────────────────────────────────────
+  let carrito = []; // [{ id, nombre, precio, cantidad, stock }]
+
+  // ── Navegación entre vistas ──────────────────────────────────────────────
+  function mostrarVista(nombre) {
+    document.querySelectorAll('.vista').forEach(v => v.classList.remove('activa'));
+    document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('activo'));
+    document.getElementById(`vista-${nombre}`).classList.add('activa');
+
+    if (nombre === 'carrito')    { renderCarrito(); document.querySelectorAll('.nav-link')[1].classList.add('activo'); }
+    if (nombre === 'productos')  { document.querySelectorAll('.nav-link')[0].classList.add('activo'); }
+  }
+
+  // ── Toast ────────────────────────────────────────────────────────────────
+  function mostrarToast(texto, tipo = 'ok') {
+    const el = document.getElementById('toast');
+    el.textContent = texto;
+    el.className = `toast ${tipo} visible`;
+    setTimeout(() => { el.classList.remove('visible'); }, 3500);
+  }
+
+  // ── Helpers formato ──────────────────────────────────────────────────────
+  const formatPrecio = n => `$\u00a0${Number(n).toLocaleString('es-CL')}`;
+
+  // ── Icono por producto ───────────────────────────────────────────────────
+  function iconoProducto(nombre) {
+    const n = nombre.toLowerCase();
+    if (n.includes('zapati') || n.includes('runner'))    return '👟';
+    if (n.includes('jean') || n.includes('pant'))        return '👖';
+    if (n.includes('polera') || n.includes('camiseta'))  return '👕';
+    if (n.includes('chaqueta') || n.includes('parka'))   return '🧥';
+    if (n.includes('gorro') || n.includes('sombrero'))   return '🧢';
+    if (n.includes('calcet'))                            return '🧦';
+    if (n.includes('mochila') || n.includes('bolso'))    return '🎒';
+    if (n.includes('poleron') || n.includes('hoodie'))   return '🧶';
+    return '🛍️';
+  }
+
+  // ── Cargar y renderizar productos ────────────────────────────────────────
+  async function cargarProductos() {
+    const grid = document.getElementById('grid-productos');
+    try {
+      const res      = await fetch('/productos');
+      const productos = await res.json();
+
+      if (productos.length === 0) {
+        grid.innerHTML = '<p style="color:var(--gris-med)">No hay productos disponibles.</p>';
+        return;
+      }
+
+      grid.innerHTML = productos.map(p => {
+        const enCarrito   = carrito.find(c => c.id === p.id);
+        const stockReal   = p.stock - (enCarrito ? enCarrito.cantidad : 0);
+        const agotado     = stockReal <= 0;
+        const stockClass  = agotado ? 'agotado' : (stockReal <= 5 ? 'bajo' : '');
+        const stockTxt    = agotado ? 'Agotado' : `Stock: ${stockReal}`;
+
+        return `
+          <div class="card">
+            <div class="card-img">${iconoProducto(p.nombre)}</div>
+            <div class="card-body">
+              <div class="card-nombre">${p.nombre}</div>
+              <div class="card-precio">${formatPrecio(p.precio)}</div>
+              <div class="card-stock ${stockClass}">${stockTxt}</div>
+              <button class="btn-agregar"
+                onclick="agregarAlCarrito('${p.id}', '${p.nombre}', ${p.precio}, ${p.stock})"
+                ${agotado ? 'disabled' : ''}>
+                ${agotado ? 'Sin stock' : '+ Agregar al carrito'}
+              </button>
+            </div>
+          </div>`;
+      }).join('');
+    } catch {
+      grid.innerHTML = '<p style="color:var(--peligro)">Error al cargar productos.</p>';
+    }
+  }
+
+  // ── Carrito: agregar ─────────────────────────────────────────────────────
+  function agregarAlCarrito(id, nombre, precio, stock) {
+    const existente = carrito.find(c => c.id === id);
+    if (existente) {
+      if (existente.cantidad >= stock) {
+        mostrarToast(`No hay más stock de ${nombre}`, 'error');
+        return;
+      }
+      existente.cantidad++;
+    } else {
+      carrito.push({ id, nombre, precio, cantidad: 1, stock });
+    }
+    actualizarContador();
+    cargarProductos(); // refrescar estado de botones
+    mostrarToast(`${nombre} agregado al carrito ✓`, 'ok');
+  }
+
+  // ── Carrito: actualizar contador ─────────────────────────────────────────
+  function actualizarContador() {
+    const total = carrito.reduce((acc, i) => acc + i.cantidad, 0);
+    document.getElementById('carrito-count').textContent = total;
+  }
+
+  // ── Carrito: cambiar cantidad ────────────────────────────────────────────
+  function cambiarCantidad(id, delta) {
+    const item = carrito.find(c => c.id === id);
+    if (!item) return;
+    item.cantidad += delta;
+    if (item.cantidad <= 0) carrito = carrito.filter(c => c.id !== id);
+    actualizarContador();
+    cargarProductos();
+    renderCarrito();
+  }
+
+  // ── Carrito: quitar ítem ─────────────────────────────────────────────────
+  function quitarItem(id) {
+    carrito = carrito.filter(c => c.id !== id);
+    actualizarContador();
+    cargarProductos();
+    renderCarrito();
+  }
+
+  // ── Carrito: renderizar ──────────────────────────────────────────────────
+  function renderCarrito() {
+    const el = document.getElementById('contenido-carrito');
+
+    if (carrito.length === 0) {
+      el.innerHTML = `
+        <div class="carrito-vacio">
+          <div class="icon">🛒</div>
+          <p>Tu carrito está vacío.</p>
+          <button class="btn-link" onclick="mostrarVista('productos')">Ver productos →</button>
+        </div>`;
+      return;
+    }
+
+    // Precios incluyen IVA — se desglosa para la boleta
+    const total    = carrito.reduce((acc, i) => acc + i.precio * i.cantidad, 0);
+    const neto     = Math.round(total / 1.19);
+    const iva      = total - neto;
+
+    const filas = carrito.map(i => `
+      <tr>
+        <td>${i.nombre}</td>
+        <td>
+          <div class="qty-control">
+            <button class="qty-btn" onclick="cambiarCantidad('${i.id}', -1)">−</button>
+            <span class="qty-num">${i.cantidad}</span>
+            <button class="qty-btn" onclick="cambiarCantidad('${i.id}', 1)"
+              ${i.cantidad >= i.stock ? 'disabled style="opacity:0.3"' : ''}>+</button>
+          </div>
+        </td>
+        <td>${formatPrecio(i.precio)}</td>
+        <td>${formatPrecio(i.precio * i.cantidad)}</td>
+        <td><button class="btn-quitar" onclick="quitarItem('${i.id}')">Quitar</button></td>
+      </tr>`).join('');
+
+    el.innerHTML = `
+      <table class="tabla-carrito">
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Cantidad</th>
+            <th>Precio unit.</th>
+            <th>Subtotal</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody>${filas}</tbody>
+      </table>
+
+      <div class="resumen">
+        <div class="resumen-titulo">Resumen</div>
+        <div class="resumen-linea"><span>Neto</span><span>${formatPrecio(neto)}</span></div>
+        <div class="resumen-linea"><span>IVA (19%)</span><span>${formatPrecio(iva)}</span></div>
+        <div class="resumen-linea total"><span>Total (IVA incluido)</span><span>${formatPrecio(total)}</span></div>
+        <button class="btn-comprar" id="btn-comprar" onclick="procesarCompra()">
+          Comprar ahora
+        </button>
+      </div>`;
+  }
+
+  // ── Procesar compra ──────────────────────────────────────────────────────
+  async function procesarCompra() {
+    const btn = document.getElementById('btn-comprar');
+    btn.disabled = true;
+    btn.textContent = 'Procesando...';
+
+    try {
+      const res  = await fetch('/venta', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(carrito.map(i => ({
+          id:       i.id,
+          nombre:   i.nombre,
+          precio:   i.precio,
+          cantidad: i.cantidad
+        })))
+      });
+      const venta = await res.json();
+
+      if (!res.ok) {
+        mostrarToast(venta.error || 'Error al procesar la compra', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Comprar ahora';
+        return;
+      }
+
+      // Limpiar carrito y mostrar confirmación
+      carrito = [];
+      actualizarContador();
+      cargarProductos();
+      mostrarConfirmacion(venta);
+
+    } catch {
+      mostrarToast('Error de conexión con el servidor', 'error');
+      btn.disabled = false;
+      btn.textContent = 'Comprar ahora';
+    }
+  }
+
+  // ── Mostrar confirmación ─────────────────────────────────────────────────
+  function mostrarConfirmacion(venta) {
+    const filas = venta.items.map(i => `
+      <tr>
+        <td>${i.nombre}</td>
+        <td>${i.cantidad}</td>
+        <td>${formatPrecio(i.precio)}</td>
+        <td>${formatPrecio(i.subtotal)}</td>
+      </tr>`).join('');
+
+    document.getElementById('contenido-confirmacion').innerHTML = `
+      <div class="badge-exito">✓ Éxito (201 Created)</div>
+
+      <div class="confirm-info">
+        <p>ID de venta: <span>${venta.id}</span></p>
+        <p>Fecha: <span>${venta.fecha}</span></p>
+      </div>
+
+      <p class="detalle-titulo">Detalle de la venta</p>
+      <table class="tabla-detalle">
+        <thead>
+          <tr><th>Producto</th><th>Cantidad</th><th>Precio unit.</th><th>Subtotal</th></tr>
+        </thead>
+        <tbody>${filas}</tbody>
+      </table>
+
+      <div class="totales-confirm">
+        <div class="totales-confirm-izq">
+          <div class="total-item">Neto<strong>${formatPrecio(venta.neto)}</strong></div>
+          <div class="total-item">IVA (19%)<strong>${formatPrecio(venta.iva)}</strong></div>
+        </div>
+        <div class="total-principal">${formatPrecio(venta.total)}</div>
+      </div>
+
+      <button class="btn-volver" onclick="mostrarVista('productos')">
+        ← Volver a productos
+      </button>`;
+
+    mostrarVista('confirmacion');
+  }
+
+  // ── Init ─────────────────────────────────────────────────────────────────
+  cargarProductos();
+</script>
+</body>
+</html>

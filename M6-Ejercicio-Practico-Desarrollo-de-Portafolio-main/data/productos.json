@@ -1,0 +1,50 @@
+[
+  {
+    "id": "1",
+    "nombre": "Zapatillas Runner",
+    "precio": 25990,
+    "stock": 10
+  },
+  {
+    "id": "2",
+    "nombre": "Jeans Regular",
+    "precio": 12990,
+    "stock": 8
+  },
+  {
+    "id": "3",
+    "nombre": "Polera Básica",
+    "precio": 5990,
+    "stock": 25
+  },
+  {
+    "id": "4",
+    "nombre": "Chaqueta Parka",
+    "precio": 39990,
+    "stock": 5
+  },
+  {
+    "id": "5",
+    "nombre": "Gorro Invierno",
+    "precio": 4990,
+    "stock": 30
+  },
+  {
+    "id": "6",
+    "nombre": "Calcetines Pack x3",
+    "precio": 3990,
+    "stock": 18
+  },
+  {
+    "id": "7",
+    "nombre": "Mochila Urbana",
+    "precio": 21990,
+    "stock": 10
+  },
+  {
+    "id": "8",
+    "nombre": "Polerón Hoodie",
+    "precio": 18990,
+    "stock": 7
+  }
+]

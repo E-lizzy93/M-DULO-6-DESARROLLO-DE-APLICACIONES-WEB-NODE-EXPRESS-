@@ -1,0 +1,34 @@
+[
+  {
+    "id": "f93f4be7-e401-4a6f-a1d2-5c879118e501",
+    "fecha": "11-03-2026, 1:01:01 a. m.",
+    "items": [
+      {
+        "id": "1",
+        "nombre": "Zapatillas Runner",
+        "cantidad": 1,
+        "precio": 25990,
+        "subtotal": 25990
+      }
+    ],
+    "subtotal": 25990,
+    "iva": 4938,
+    "total": 30928
+  },
+  {
+    "id": "7ab8c452-a888-4b84-8287-5b9227982dec",
+    "fecha": "11-03-2026, 1:01:53 a. m.",
+    "items": [
+      {
+        "id": "1",
+        "nombre": "Zapatillas Runner",
+        "cantidad": 1,
+        "precio": 25990,
+        "subtotal": 25990
+      }
+    ],
+    "subtotal": 25990,
+    "iva": 4938,
+    "total": 30928
+  }
+]

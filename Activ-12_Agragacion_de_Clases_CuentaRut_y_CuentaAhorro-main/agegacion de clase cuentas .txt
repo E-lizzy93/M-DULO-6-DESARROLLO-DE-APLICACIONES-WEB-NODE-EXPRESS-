@@ -1,0 +1,18 @@
+ENTREGA MÓDULO 6: DESARROLLO DE APLICACIONES WEB
+📂 Proyecto:Ejercicio Práctico - Archivos y JSON (continuación)
+
+REPOSITORIO GITHUB: 🔗 https://github.com/E-lizzy93/M-DULO-6-DESARROLLO-DE-APLICACIONES-WEB-NODE-EXPRESS-
+
+Carpeta: /Activ-12_Agragacion_de_Clases_CuentaRut_y_CuentaAhorro-main
+
+Estructura del Proyecto:
+
+/models: Carpeta fundamental donde se definen las clases para CuentaRut y CuentaAhorro, aplicando el concepto de agregación para modelar la relación entre clientes y sus distintos tipos de cuenta.
+
+/public: Interfaz de usuario para visualizar la gestión de las cuentas bancarias de forma interactiva.
+
+server.js: Servidor Express que actúa como puente entre los modelos de clases y la interfaz, gestionando las peticiones de los clientes.
+
+clientes.json: Fuente de datos persistente para alimentar las instancias de las clases creadas.
+
+package.json: Configuración de dependencias y scripts del proyecto.
