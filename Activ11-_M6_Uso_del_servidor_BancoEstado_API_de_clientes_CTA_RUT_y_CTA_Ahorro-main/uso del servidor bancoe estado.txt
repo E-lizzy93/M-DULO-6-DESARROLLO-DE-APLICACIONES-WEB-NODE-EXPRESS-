@@ -1,0 +1,18 @@
+ENTREGA MÓDULO 6: DESARROLLO DE APLICACIONES WEB
+📂 Proyecto:Ejercicio Práctico - Archivos y JSON
+
+REPOSITORIO GITHUB: 🔗 https://github.com/E-lizzy93/M-DULO-6-DESARROLLO-DE-APLICACIONES-WEB-NODE-EXPRESS-
+
+Carpeta: /Activ11-_M6_Uso_del_servidor_BancoEstado_API_de_clientes_CTA_RUT_y_CTA_Ahorro-main
+
+Estructura del Proyecto:
+
+/public: Interfaz de usuario que consume la API del banco para mostrar la información de las cuentas y clientes.
+
+server.js: Servidor desarrollado con Node.js y Express que contiene la lógica para gestionar los datos bancarios.
+
+clientes.json: Archivo de datos estructurado donde se almacena la información de RUTs y cuentas de ahorro.
+
+package.json: Registro de las dependencias del proyecto y comandos de inicio.
+
+README.md: Instrucciones específicas de esta actividad.

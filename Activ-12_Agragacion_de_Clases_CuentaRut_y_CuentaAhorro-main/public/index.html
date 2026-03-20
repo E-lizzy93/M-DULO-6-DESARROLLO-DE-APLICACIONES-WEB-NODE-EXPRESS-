@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Actividad 12 - BancoEstado</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<header>
+  <span>🏦</span>
+  <h1>BancoEstado - Gestión de Cuentas</h1>
+</header>
+
+<div class="contenedor">
+  <div class="mensaje" id="mensaje"></div>
+
+  <div class="layout">
+
+    <!-- Botones izquierda -->
+    <div class="acciones">
+      <button class="btn-primario"   onclick="listarTodos()">👥 Listar todos los clientes</button>
+      <button class="btn-secundario" onclick="listarConRut()">🪪 Listar con cuenta RUT</button>
+      <button class="btn-success"    onclick="abrirModal('cuenta-rut')">💳 Abrir cuenta RUT</button>
+      <button class="btn-success"    onclick="abrirModal('cuenta-ahorro')">💰 Abrir cuenta Ahorro</button>
+      <button class="btn-danger"     onclick="abrirModal('cerrar-ahorro')">❌ Cerrar cuenta Ahorro</button>
+      <button class="btn-danger"     onclick="abrirModal('cerrar-cliente')">🗑 Cerrar cuenta principal</button>
+    </div>
+
+    <!-- Resultados derecha -->
+    <div class="resultado-col">
+      <div class="panel" id="panel-resultado" style="display:none">
+        <h2 id="panel-titulo"></h2>
+        <div id="panel-contenido"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── MODAL: Abrir cuenta RUT ────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-cuenta-rut">
+  <div class="modal">
+    <h3>💳 Abrir cuenta RUT</h3>
+
+    <label class="form-label">RUT del cliente</label>
+    <div class="input-buscar">
+      <input type="text" id="cr-rut" placeholder="Ej: 12345678-9">
+      <button class="btn-primario btn-small" onclick="verificarRutParaCrear()">Verificar</button>
+    </div>
+    <div id="cr-info" class="info-cliente" style="display:none"></div>
+
+    <div id="cr-form" style="display:none">
+      <label class="form-label">Nombre del cliente</label>
+      <input type="text" id="cr-nombre" placeholder="Nombre completo">
+
+      <label class="form-label">Saldo inicial cuenta RUT</label>
+      <input type="number" id="cr-saldo" placeholder="Ej: 100000" min="0">
+
+      <div class="separador">
+        <label class="checkbox-label">
+          <input type="checkbox" id="cr-tiene-ahorro" onchange="toggleAhorroEnRut()">
+          ¿Abrir también una cuenta Ahorro?
+        </label>
+      </div>
+
+      <div id="cr-seccion-ahorro" style="display:none">
+        <label class="form-label">Saldo inicial cuenta Ahorro</label>
+        <input type="number" id="cr-saldo-ahorro" placeholder="Ej: 50000" min="0">
+      </div>
+    </div>
+
+    <div class="modal-botones">
+      <button class="btn-secundario" onclick="cerrarModal('cuenta-rut')">Cancelar</button>
+      <button class="btn-success" id="btn-crear-cliente" style="display:none" onclick="crearCliente()">Crear cliente</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL: Abrir cuenta Ahorro ─────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-cuenta-ahorro">
+  <div class="modal">
+    <h3>💰 Abrir cuenta Ahorro</h3>
+
+    <label class="form-label">RUT del cliente</label>
+    <div class="input-buscar">
+      <input type="text" id="ca-rut" placeholder="Ej: 12345678-9">
+      <button class="btn-primario btn-small" onclick="verificarRutParaAhorro()">Verificar</button>
+    </div>
+    <div id="ca-info" class="info-cliente" style="display:none"></div>
+
+    <div id="ca-form" style="display:none">
+      <label class="form-label">Saldo inicial cuenta Ahorro</label>
+      <input type="number" id="ca-saldo" placeholder="Ej: 50000" min="0">
+    </div>
+
+    <div class="modal-botones">
+      <button class="btn-secundario" onclick="cerrarModal('cuenta-ahorro')">Cancelar</button>
+      <button class="btn-success" id="btn-abrir-ahorro" style="display:none" onclick="abrirAhorro()">Abrir cuenta</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL: Cerrar cuenta Ahorro ────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-cerrar-ahorro">
+  <div class="modal">
+    <h3>❌ Cerrar cuenta Ahorro</h3>
+
+    <label class="form-label">RUT del cliente</label>
+    <div class="input-buscar">
+      <input type="text" id="cah-rut" placeholder="Ej: 12345678-9">
+      <button class="btn-primario btn-small" onclick="verificarRutParaCerrarAhorro()">Verificar</button>
+    </div>
+    <div id="cah-info" class="info-cliente" style="display:none"></div>
+
+    <div id="cah-form" style="display:none">
+      <label class="form-label">Seleccionar cuenta a cerrar</label>
+      <select id="cah-select" class="form-select"></select>
+      <p class="aviso">⚠️ El saldo será transferido automáticamente a la cuenta RUT</p>
+    </div>
+
+    <div class="modal-botones">
+      <button class="btn-secundario" onclick="cerrarModal('cerrar-ahorro')">Cancelar</button>
+      <button class="btn-danger" id="btn-cerrar-ahorro" style="display:none" onclick="cerrarCuentaAhorro()">Cerrar cuenta</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL: Cerrar cuenta principal ─────────────────────────────────── -->
+<div class="modal-overlay" id="modal-cerrar-cliente">
+  <div class="modal">
+    <h3>🗑 Cerrar cuenta principal</h3>
+
+    <label class="form-label">RUT del cliente</label>
+    <div class="input-buscar">
+      <input type="text" id="cc-rut" placeholder="Ej: 12345678-9">
+      <button class="btn-primario btn-small" onclick="verificarRutParaCerrarCliente()">Verificar</button>
+    </div>
+    <div id="cc-info" class="info-cliente" style="display:none"></div>
+
+    <div class="modal-botones">
+      <button class="btn-secundario" onclick="cerrarModal('cerrar-cliente')">Cancelar</button>
+      <button class="btn-danger" id="btn-cerrar-cliente" style="display:none" onclick="cerrarCliente()">Confirmar cierre</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let clienteActual = null; // cliente encontrado al verificar RUT
+
+  // ── Helpers UI ───────────────────────────────────────────────────────────
+  function abrirModal(nombre) {
+    clienteActual = null;
+    document.getElementById(`modal-${nombre}`).classList.add('activo');
+  }
+
+  function cerrarModal(nombre) {
+    document.getElementById(`modal-${nombre}`).classList.remove('activo');
+    // Limpiar inputs y secciones del modal
+    document.querySelectorAll(`#modal-${nombre} input`).forEach(i => {
+      if (i.type === 'checkbox') i.checked = false;
+      else i.value = '';
+    });
+    document.querySelectorAll(`#modal-${nombre} [id$="-info"]`).forEach(el => el.style.display = 'none');
+    document.querySelectorAll(`#modal-${nombre} [id$="-form"]`).forEach(el => el.style.display = 'none');
+    document.querySelectorAll(`#modal-${nombre} [id^="btn-"]`).forEach(el => el.style.display = 'none');
+    const secAhorro = document.getElementById('cr-seccion-ahorro');
+    if (secAhorro) secAhorro.style.display = 'none';
+    clienteActual = null;
+  }
+
+  function mostrarMensaje(texto, tipo) {
+    const el = document.getElementById('mensaje');
+    el.textContent = texto;
+    el.className = `mensaje ${tipo}`;
+    setTimeout(() => { el.className = 'mensaje'; }, 5000);
+  }
+
+  function mostrarPanel(titulo, html) {
+    document.getElementById('panel-titulo').textContent = titulo;
+    document.getElementById('panel-contenido').innerHTML = html;
+    document.getElementById('panel-resultado').style.display = 'block';
+  }
+
+  function toggleAhorroEnRut() {
+    const checked = document.getElementById('cr-tiene-ahorro').checked;
+    document.getElementById('cr-seccion-ahorro').style.display = checked ? 'block' : 'none';
+  }
+
+  // ── Renderizar tabla ─────────────────────────────────────────────────────
+  function renderizarClientes(clientes, titulo) {
+    if (clientes.length === 0) {
+      mostrarPanel(titulo, '<p>No hay clientes.</p>');
+      return;
+    }
+    let html = `<table>
+      <tr><th>ID</th><th>RUT</th><th>Nombre</th><th>Cuenta RUT</th><th>Cuentas Ahorro</th></tr>`;
+
+    clientes.forEach(c => {
+      const rut = c.cuentaRut
+        ? `<span class="cuenta-rut">${c.cuentaRut.numero}</span><br>Saldo: $${Number(c.cuentaRut.saldo).toLocaleString()}`
+        : '<em>Sin cuenta RUT</em>';
+      const ahorros = c.cuentasAhorro && c.cuentasAhorro.length > 0
+        ? c.cuentasAhorro.map(a =>
+            `<span class="cuenta-ahorro">${a.numero}</span> $${Number(a.saldo).toLocaleString()}`
+          ).join('<br>')
+        : '<em>Sin cuentas ahorro</em>';
+
+      html += `<tr>
+        <td>${c.id}</td>
+        <td>${c.rut}</td>
+        <td><strong>${c.nombre}</strong></td>
+        <td>${rut}</td>
+        <td>${ahorros}</td>
+      </tr>`;
+    });
+
+    html += '</table>';
+    mostrarPanel(titulo, html);
+  }
+
+  // ── Listar ───────────────────────────────────────────────────────────────
+  async function listarTodos() {
+    const res = await fetch('/api/clientes');
+    renderizarClientes(await res.json(), '👥 Todos los clientes');
+  }
+
+  async function listarConRut() {
+    const res = await fetch('/api/clientes/rut');
+    renderizarClientes(await res.json(), '🪪 Clientes con cuenta RUT');
+  }
+
+  // ── Verificar RUT (usado en varios modales) ───────────────────────────────
+  async function buscarPorRut(rut) {
+    const res  = await fetch(`/api/clientes/buscar?rut=${encodeURIComponent(rut)}`);
+    const data = await res.json();
+    return { ok: res.ok, data };
+  }
+
+  // ── MODAL Cuenta RUT: verificar si el RUT ya existe ──────────────────────
+  async function verificarRutParaCrear() {
+    const rut    = document.getElementById('cr-rut').value.trim();
+    const infoEl = document.getElementById('cr-info');
+    const formEl = document.getElementById('cr-form');
+    const btnEl  = document.getElementById('btn-crear-cliente');
+    if (!rut) return mostrarMensaje('Ingresa el RUT', 'error');
+
+    const { ok, data } = await buscarPorRut(rut);
+
+    if (ok) {
+      // Cliente ya existe
+      infoEl.innerHTML = `<p class="info-error">⚠️ Este RUT ya tiene cuenta registrada:<br><strong>${data.nombre}</strong></p>`;
+      infoEl.style.display = 'block';
+      formEl.style.display = 'none';
+      btnEl.style.display  = 'none';
+    } else {
+      // RUT libre, mostrar formulario de creación
+      infoEl.innerHTML = `<p class="info-ok">✅ RUT disponible. Complete los datos para crear la cuenta.</p>`;
+      infoEl.style.display = 'block';
+      formEl.style.display = 'block';
+      btnEl.style.display  = 'inline-block';
+    }
+  }
+
+  // ── MODAL Cuenta Ahorro: verificar RUT ───────────────────────────────────
+  async function verificarRutParaAhorro() {
+    const rut    = document.getElementById('ca-rut').value.trim();
+    const infoEl = document.getElementById('ca-info');
+    const formEl = document.getElementById('ca-form');
+    const btnEl  = document.getElementById('btn-abrir-ahorro');
+    if (!rut) return mostrarMensaje('Ingresa el RUT', 'error');
+
+    const { ok, data } = await buscarPorRut(rut);
+
+    if (!ok) {
+      infoEl.innerHTML = `<p class="info-error">⚠️ RUT no encontrado. El cliente debe abrir una cuenta RUT primero.</p>`;
+      infoEl.style.display = 'block';
+      formEl.style.display = 'none';
+      btnEl.style.display  = 'none';
+      return;
+    }
+
+    if (data.cuentaRut.saldo < 1000) {
+      infoEl.innerHTML = `<p class="info-error">⚠️ Saldo insuficiente en cuenta RUT ($${data.cuentaRut.saldo.toLocaleString()}). Mínimo $1.000 requerido.</p>`;
+      infoEl.style.display = 'block';
+      formEl.style.display = 'none';
+      btnEl.style.display  = 'none';
+      return;
+    }
+
+    clienteActual = data;
+    infoEl.innerHTML = `<p class="info-ok">✅ Cliente: <strong>${data.nombre}</strong> | Cuenta RUT: ${data.cuentaRut.numero} | Saldo: $${data.cuentaRut.saldo.toLocaleString()}</p>`;
+    infoEl.style.display = 'block';
+    formEl.style.display = 'block';
+    btnEl.style.display  = 'inline-block';
+  }
+
+  // ── MODAL Cerrar Ahorro: verificar RUT y listar cuentas ahorro ───────────
+  async function verificarRutParaCerrarAhorro() {
+    const rut    = document.getElementById('cah-rut').value.trim();
+    const infoEl = document.getElementById('cah-info');
+    const formEl = document.getElementById('cah-form');
+    const btnEl  = document.getElementById('btn-cerrar-ahorro');
+    if (!rut) return mostrarMensaje('Ingresa el RUT', 'error');
+
+    const { ok, data } = await buscarPorRut(rut);
+
+    if (!ok) {
+      infoEl.innerHTML = `<p class="info-error">⚠️ Cliente no encontrado.</p>`;
+      infoEl.style.display = 'block';
+      return;
+    }
+    if (!data.cuentasAhorro || data.cuentasAhorro.length === 0) {
+      infoEl.innerHTML = `<p class="info-error">⚠️ <strong>${data.nombre}</strong> no tiene cuentas de ahorro.</p>`;
+      infoEl.style.display = 'block';
+      formEl.style.display = 'none';
+      btnEl.style.display  = 'none';
+      return;
+    }
+
+    clienteActual = data;
+    infoEl.innerHTML = `<p class="info-ok">✅ Cliente: <strong>${data.nombre}</strong></p>`;
+    infoEl.style.display = 'block';
+
+    // Llenar el select con las cuentas ahorro
+    const select = document.getElementById('cah-select');
+    select.innerHTML = data.cuentasAhorro.map(a =>
+      `<option value="${a.numero}">${a.numero} — Saldo: $${Number(a.saldo).toLocaleString()}</option>`
+    ).join('');
+
+    formEl.style.display = 'block';
+    btnEl.style.display  = 'inline-block';
+  }
+
+  // ── MODAL Cerrar Cliente: verificar RUT y mostrar saldo total ────────────
+  async function verificarRutParaCerrarCliente() {
+    const rut    = document.getElementById('cc-rut').value.trim();
+    const infoEl = document.getElementById('cc-info');
+    const btnEl  = document.getElementById('btn-cerrar-cliente');
+    if (!rut) return mostrarMensaje('Ingresa el RUT', 'error');
+
+    const { ok, data } = await buscarPorRut(rut);
+
+    if (!ok) {
+      infoEl.innerHTML = `<p class="info-error">⚠️ Cliente no encontrado.</p>`;
+      infoEl.style.display = 'block';
+      btnEl.style.display  = 'none';
+      return;
+    }
+
+    clienteActual = data;
+    const saldoRut    = data.cuentaRut ? data.cuentaRut.saldo : 0;
+    const saldoAhorro = data.cuentasAhorro.reduce((acc, a) => acc + a.saldo, 0);
+    const saldoTotal  = saldoRut + saldoAhorro;
+
+    infoEl.innerHTML = `
+      <p class="info-error">
+        ⚠️ <strong>${data.nombre}</strong> (ID: ${data.id})<br>
+        Saldo cuenta RUT: $${saldoRut.toLocaleString()}<br>
+        Saldo cuentas ahorro: $${saldoAhorro.toLocaleString()}<br>
+        <strong>Saldo total a retirar: $${saldoTotal.toLocaleString()}</strong><br><br>
+        Confirme que el cliente ha retirado todos sus fondos antes de cerrar.
+      </p>`;
+    infoEl.style.display = 'block';
+    btnEl.style.display  = 'inline-block';
+  }
+
+  // ── Acciones ─────────────────────────────────────────────────────────────
+
+  async function crearCliente() {
+    const rut        = document.getElementById('cr-rut').value.trim();
+    const nombre     = document.getElementById('cr-nombre').value.trim();
+    const saldoRut   = Number(document.getElementById('cr-saldo').value) || 0;
+    const tieneAhorro = document.getElementById('cr-tiene-ahorro').checked;
+    const saldoAhorro = Number(document.getElementById('cr-saldo-ahorro').value) || 0;
+
+    if (!nombre) return mostrarMensaje('Ingresa el nombre del cliente', 'error');
+
+    const body = { rut, nombre, saldoRut, abrirAhorro: tieneAhorro, saldoAhorro };
+    const res  = await fetch('/api/clientes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    mostrarMensaje(data.mensaje || data.error, res.ok ? 'ok' : 'error');
+    if (res.ok) { cerrarModal('cuenta-rut'); listarTodos(); }
+  }
+
+  async function abrirAhorro() {
+    if (!clienteActual) return mostrarMensaje('Verifica el RUT primero', 'error');
+    const saldo = Number(document.getElementById('ca-saldo').value) || 0;
+
+    const res  = await fetch(`/api/clientes/${clienteActual.id}/ahorro`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ saldo })
+    });
+    const data = await res.json();
+    mostrarMensaje(data.mensaje || data.error, res.ok ? 'ok' : 'error');
+    if (res.ok) { cerrarModal('cuenta-ahorro'); listarTodos(); }
+  }
+
+  async function cerrarCuentaAhorro() {
+    if (!clienteActual) return mostrarMensaje('Verifica el RUT primero', 'error');
+    const numAhorro = document.getElementById('cah-select').value;
+
+    const res  = await fetch(`/api/clientes/${clienteActual.id}/ahorro/${encodeURIComponent(numAhorro)}`, {
+      method: 'DELETE'
+    });
+    const data = await res.json();
+    mostrarMensaje(data.mensaje || data.error, res.ok ? 'ok' : 'error');
+    if (res.ok) { cerrarModal('cerrar-ahorro'); listarTodos(); }
+  }
+
+  async function cerrarCliente() {
+    if (!clienteActual) return mostrarMensaje('Verifica el RUT primero', 'error');
+
+    const res  = await fetch(`/api/clientes/${clienteActual.id}`, { method: 'DELETE' });
+    const data = await res.json();
+    mostrarMensaje(data.mensaje || data.error, res.ok ? 'ok' : 'error');
+    if (res.ok) { cerrarModal('cerrar-cliente'); listarTodos(); }
+  }
+</script>
+
+</body>
+</html>
