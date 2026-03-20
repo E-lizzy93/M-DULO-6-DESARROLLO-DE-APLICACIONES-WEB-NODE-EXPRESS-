@@ -23,7 +23,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: false }));
 
 // Datos de la tienda
-const tienda = {
+const tienda*= {
   nombre: 'MiniShop',
   bienvenida: '¡Encuentra los mejores productos al mejor precio!'
 };

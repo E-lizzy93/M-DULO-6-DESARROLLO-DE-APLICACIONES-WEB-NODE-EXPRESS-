@@ -1,0 +1,19 @@
+ENTREGA MÓDULO 6: DESARROLLO DE APLICACIONES WEB
+
+📂 Proyecto: MiniShop con Node.js, Express y Handlebars
+
+
+REPOSITORIO GITHUB: 
+🔗 https://github.com/E-lizzy93/M-DULO-6-DESARROLLO-DE-APLICACIONES-WEB-NODE-EXPRESS-
+
+Carpeta: /MiniShop_con_Node.js_Express_y_Handlebars-main
+
+Estructura del Proyecto:
+
+/views: Contiene los archivos .hbs (plantillas) para la visualización dinámica de productos.
+
+/public/css: Archivos de estilos para la interfaz de la tienda.
+
+app.js: Servidor principal donde se configuran las rutas y el motor de vistas.
+
+package.json: Registro de dependencias (express, express-handlebars).

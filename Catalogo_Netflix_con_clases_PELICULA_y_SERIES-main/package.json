@@ -1,0 +1,9 @@
+{
+  "name": "actividad8-netflix",
+  "version": "1.0.0",
+  "description": "Catálogo Netflix con clases Pelicula y Serie",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  }
+}

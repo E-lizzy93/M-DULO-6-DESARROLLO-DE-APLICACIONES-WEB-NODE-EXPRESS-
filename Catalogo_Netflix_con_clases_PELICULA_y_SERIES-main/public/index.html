@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Catálogo Netflix</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+  <h1>🎬 Catálogo Netflix</h1>
+
+  <!-- Botones principales -->
+  <div class="botones">
+    <button onclick="cargarLista('peliculas')">🎥 LISTA DE PELÍCULAS</button>
+    <button onclick="cargarLista('series')">📺 LISTA DE SERIES</button>
+  </div>
+
+  <!-- Ordenamiento -->
+  <div class="orden" id="seccionOrden" style="display:none">
+    <label>Ordenar por:</label>
+    <select id="criterioOrden" onchange="ordenarLista()">
+      <option value="nombre">Nombre</option>
+      <option value="anio">Año</option>
+      <option value="director">Director (solo películas)</option>
+      <option value="temporadas">Temporadas (solo series)</option>
+    </select>
+  </div>
+
+  <!-- Tabla de resultados -->
+  <div id="resultado"></div>
+
+  <!-- Formularios -->
+  <div class="formularios">
+
+    <div class="form-card">
+      <h2>➕ Agregar Película</h2>
+      <input type="text"   id="pel-nombre"   placeholder="Nombre">
+      <input type="text"   id="pel-director" placeholder="Director">
+      <input type="number" id="pel-anio"     placeholder="Año de estreno">
+      <button onclick="agregarPelicula()">AGREGAR NUEVA PELÍCULA</button>
+      <div class="mensaje" id="msg-pelicula"></div>
+    </div>
+
+    <div class="form-card">
+      <h2>➕ Agregar Serie</h2>
+      <input type="text"   id="ser-nombre"    placeholder="Nombre">
+      <input type="number" id="ser-anio"      placeholder="Año de estreno">
+      <input type="number" id="ser-temporadas" placeholder="Número de temporadas">
+      <button onclick="agregarSerie()">AGREGAR NUEVA SERIE</button>
+      <div class="mensaje" id="msg-serie"></div>
+    </div>
+
+  </div>
+
+<script>
+  let tipoActual    = '';
+  let datosActuales = [];
+
+  async function cargarLista(tipo) {
+    tipoActual = tipo;
+    try {
+      const res  = await fetch(`/catalogo?tipo=${tipo}`);
+      const data = await res.json();
+      datosActuales = data;
+      document.getElementById('seccionOrden').style.display = 'flex';
+      mostrarTabla(datosActuales, tipo);
+    } catch (err) {
+      document.getElementById('resultado').innerHTML = '<p style="color:red">Error al cargar la lista</p>';
+    }
+  }
+
+  function mostrarTabla(datos, tipo) {
+    if (datos.length === 0) {
+      document.getElementById('resultado').innerHTML = '<p>No hay elementos.</p>';
+      return;
+    }
+    let html = '<table>';
+    if (tipo === 'peliculas') {
+      html += '<tr><th>Nombre</th><th>Director</th><th>Año</th><th>Acción</th></tr>';
+      datos.forEach(p => {
+        html += `<tr>
+          <td>${p.nombre}</td><td>${p.director}</td><td>${p.anio}</td>
+          <td><button class="btn-eliminar secundario" onclick="eliminar('${p.nombre}', 'peliculas')">🗑 Eliminar</button></td>
+        </tr>`;
+      });
+    } else {
+      html += '<tr><th>Nombre</th><th>Año</th><th>Temporadas</th><th>Acción</th></tr>';
+      datos.forEach(s => {
+        html += `<tr>
+          <td>${s.nombre}</td><td>${s.anio}</td><td>${s.temporadas}</td>
+          <td><button class="btn-eliminar secundario" onclick="eliminar('${s.nombre}', 'series')">🗑 Eliminar</button></td>
+        </tr>`;
+      });
+    }
+    html += '</table>';
+    document.getElementById('resultado').innerHTML = html;
+  }
+
+  function ordenarLista() {
+    const criterio  = document.getElementById('criterioOrden').value;
+    const ordenados = [...datosActuales].sort((a, b) => {
+      const valA = a[criterio] || '';
+      const valB = b[criterio] || '';
+      if (!isNaN(valA) && !isNaN(valB)) return Number(valA) - Number(valB);
+      return valA.toString().localeCompare(valB.toString());
+    });
+    mostrarTabla(ordenados, tipoActual);
+  }
+
+  async function agregarPelicula() {
+    const nombre   = document.getElementById('pel-nombre').value.trim();
+    const director = document.getElementById('pel-director').value.trim();
+    const anio     = document.getElementById('pel-anio').value.trim();
+    const msgEl    = document.getElementById('msg-pelicula');
+    if (!nombre || !director || !anio) return mostrarMensaje(msgEl, 'Completa todos los campos', 'error');
+    try {
+      const res  = await fetch('/catalogo?tipo=peliculas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre, director, anio })
+      });
+      const data = await res.json();
+      mostrarMensaje(msgEl, data.mensaje || data.error, res.ok ? 'ok' : 'error');
+      if (res.ok) {
+        document.getElementById('pel-nombre').value = '';
+        document.getElementById('pel-director').value = '';
+        document.getElementById('pel-anio').value = '';
+        if (tipoActual === 'peliculas') cargarLista('peliculas');
+      }
+    } catch (err) { mostrarMensaje(msgEl, 'Error de conexión', 'error'); }
+  }
+
+  async function agregarSerie() {
+    const nombre     = document.getElementById('ser-nombre').value.trim();
+    const anio       = document.getElementById('ser-anio').value.trim();
+    const temporadas = document.getElementById('ser-temporadas').value.trim();
+    const msgEl      = document.getElementById('msg-serie');
+    if (!nombre || !anio || !temporadas) return mostrarMensaje(msgEl, 'Completa todos los campos', 'error');
+    try {
+      const res  = await fetch('/catalogo?tipo=series', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre, anio, temporadas })
+      });
+      const data = await res.json();
+      mostrarMensaje(msgEl, data.mensaje || data.error, res.ok ? 'ok' : 'error');
+      if (res.ok) {
+        document.getElementById('ser-nombre').value = '';
+        document.getElementById('ser-anio').value = '';
+        document.getElementById('ser-temporadas').value = '';
+        if (tipoActual === 'series') cargarLista('series');
+      }
+    } catch (err) { mostrarMensaje(msgEl, 'Error de conexión', 'error'); }
+  }
+
+  async function eliminar(nombre, tipo) {
+    if (!confirm(`¿Eliminar "${nombre}"?`)) return;
+    try {
+      const res  = await fetch(`/catalogo?tipo=${tipo}&nombre=${encodeURIComponent(nombre)}`, { method: 'DELETE' });
+      const data = await res.json();
+      alert(data.mensaje || data.error);
+      cargarLista(tipo);
+    } catch (err) { alert('Error de conexión'); }
+  }
+
+  function mostrarMensaje(el, texto, tipo) {
+    el.textContent = texto;
+    el.className   = `mensaje ${tipo}`;
+    setTimeout(() => { el.className = 'mensaje'; }, 3000);
+  }
+</script>
+
+</body>
+</html>
