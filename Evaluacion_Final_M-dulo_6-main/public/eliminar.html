@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eliminar Mascota</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+
+<nav>
+  <div class="logo">🐾 Ministerio de las Mascotas <span>— Registro Civil</span></div>
+  <div class="nav-links">
+    <a href="/index.html">Inicio</a>
+    <a href="/mascotas.html">Mascotas</a>
+    <a href="/registrar.html">Registrar</a>
+    <a href="/buscar.html">Buscar</a>
+    <a href="/eliminar.html" class="activo">Eliminar</a>
+  </div>
+</nav>
+
+<div class="contenedor">
+
+  <!-- Eliminar por nombre -->
+  <div class="panel">
+    <div class="panel-titulo">❌ Eliminar mascota por nombre</div>
+    <p style="font-size:0.88rem; color:var(--gris-txt); margin-bottom:16px;">
+      Elimina una mascota específica del registro según su nombre.
+    </p>
+    <div style="display:flex; gap:10px; align-items:flex-end;">
+      <div class="form-grupo" style="flex:1">
+        <label>Nombre de la mascota</label>
+        <input type="text" id="del-nombre" placeholder="Ej: Firulais">
+      </div>
+      <button class="btn btn-rojo" onclick="eliminarPorNombre()">🗑 Eliminar</button>
+    </div>
+    <div class="alerta" id="alerta-nombre"></div>
+  </div>
+
+  <!-- Eliminar por RUT -->
+  <div class="panel">
+    <div class="panel-titulo">❌ Eliminar todas las mascotas de un dueño (por RUT)</div>
+    <p style="font-size:0.88rem; color:var(--gris-txt); margin-bottom:16px;">
+      Elimina <strong>todas</strong> las mascotas asociadas al RUT ingresado.
+    </p>
+    <div style="display:flex; gap:10px; align-items:flex-end;">
+      <div class="form-grupo" style="flex:1">
+        <label>RUT del dueño</label>
+        <input type="text" id="del-rut" placeholder="Ej: 12345678-9">
+      </div>
+      <button class="btn btn-rojo" onclick="eliminarPorRut()">🗑 Eliminar todas</button>
+    </div>
+    <div class="alerta" id="alerta-rut"></div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  function mostrarToast(texto, tipo = 'ok') {
+    const el = document.getElementById('toast');
+    el.textContent = texto;
+    el.className = `toast ${tipo} visible`;
+    setTimeout(() => el.classList.remove('visible'), 3500);
+  }
+
+  function mostrarAlerta(id, texto, tipo) {
+    const el = document.getElementById(id);
+    const iconos = { ok: '✅', error: '❌', info: 'ℹ️' };
+    el.innerHTML = `<span>${iconos[tipo]}</span> ${texto}`;
+    el.className = `alerta alerta-${tipo} visible`;
+  }
+
+  async function eliminarPorNombre() {
+    const nombre = document.getElementById('del-nombre').value.trim();
+    if (!nombre) { mostrarAlerta('alerta-nombre', 'Ingresa el nombre de la mascota.', 'error'); return; }
+
+    // Confirmación antes de eliminar
+    if (!confirm(`¿Estás seguro que deseas eliminar a "${nombre}" del registro?`)) return;
+
+    try {
+      const res = await axios.delete('/mascotas', { params: { nombre } });
+      mostrarAlerta('alerta-nombre', res.data.mensaje, 'ok');
+      mostrarToast(res.data.mensaje, 'ok');
+      document.getElementById('del-nombre').value = '';
+
+    } catch (err) {
+      const msg = err.response?.data?.error || 'Error al conectar con el servidor';
+      const codigo = err.response?.status || '';
+      mostrarAlerta('alerta-nombre', `${msg}${codigo ? ` (${codigo})` : ''}`, 'error');
+      mostrarToast(msg, 'error');
+    }
+  }
+
+  async function eliminarPorRut() {
+    const rut = document.getElementById('del-rut').value.trim();
+    if (!rut) { mostrarAlerta('alerta-rut', 'Ingresa el RUT del dueño.', 'error'); return; }
+
+    // Confirmación antes de eliminar
+    if (!confirm(`¿Estás seguro que deseas eliminar TODAS las mascotas del RUT ${rut}?`)) return;
+
+    try {
+      const res = await axios.delete('/mascotas', { params: { rut } });
+      mostrarAlerta('alerta-rut', res.data.mensaje, 'ok');
+      mostrarToast(res.data.mensaje, 'ok');
+      document.getElementById('del-rut').value = '';
+
+    } catch (err) {
+      const msg = err.response?.data?.error || 'Error al conectar con el servidor';
+      const codigo = err.response?.status || '';
+      mostrarAlerta('alerta-rut', `${msg}${codigo ? ` (${codigo})` : ''}`, 'error');
+      mostrarToast(msg, 'error');
+    }
+  }
+
+  // Enter en cada campo
+  document.getElementById('del-nombre').addEventListener('keydown', e => { if (e.key === 'Enter') eliminarPorNombre(); });
+  document.getElementById('del-rut').addEventListener('keydown',    e => { if (e.key === 'Enter') eliminarPorRut(); });
+</script>
+
+</body>
+</html>

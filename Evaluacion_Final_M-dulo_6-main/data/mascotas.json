@@ -1,0 +1,26 @@
+[
+  {
+    "id": "REG-00001-12345678-9",
+    "nombre": "Firulais",
+    "especie": "perro",
+    "rut": "12345678-9"
+  },
+  {
+    "id": "REG-00002-12345678-9",
+    "nombre": "Michi",
+    "especie": "gato",
+    "rut": "12345678-9"
+  },
+  {
+    "id": "REG-00003-98765432-1",
+    "nombre": "Rex",
+    "especie": "perro",
+    "rut": "98765432-1"
+  },
+  {
+    "id": "REG-00004-11111111-1",
+    "nombre": "Luna",
+    "especie": "ave",
+    "rut": "11111111-1"
+  }
+]

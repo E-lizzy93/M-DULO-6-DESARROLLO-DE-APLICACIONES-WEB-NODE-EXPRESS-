@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Listado de Mascotas</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+
+<nav>
+  <div class="logo">🐾 Ministerio de las Mascotas <span>— Registro Civil</span></div>
+  <div class="nav-links">
+    <a href="/index.html">Inicio</a>
+    <a href="/mascotas.html" class="activo">Mascotas</a>
+    <a href="/registrar.html">Registrar</a>
+    <a href="/buscar.html">Buscar</a>
+    <a href="/eliminar.html">Eliminar</a>
+  </div>
+</nav>
+
+<div class="contenedor">
+  <div class="panel">
+    <div class="panel-titulo">📋 Todas las mascotas registradas</div>
+    <div id="contenido"><div class="empty">Cargando...</div></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  function mostrarToast(texto, tipo = 'ok') {
+    const el = document.getElementById('toast');
+    el.textContent = texto;
+    el.className = `toast ${tipo} visible`;
+    setTimeout(() => el.classList.remove('visible'), 3500);
+  }
+
+  const iconoEspecie = { perro: '🐕', gato: '🐈', ave: '🐦', conejo: '🐇', otro: '🐾' };
+
+  async function cargarMascotas() {
+    const contenido = document.getElementById('contenido');
+    try {
+      const res      = await axios.get('/mascotas');
+      const mascotas = res.data;
+
+      if (mascotas.length === 0) {
+        contenido.innerHTML = `
+          <div class="empty">
+            <div class="icon">🐾</div>
+            <p>No hay mascotas registradas. <a href="/registrar.html" style="color:var(--azul)">Registrar primera →</a></p>
+          </div>`;
+        return;
+      }
+
+      contenido.innerHTML = `
+        <table>
+          <thead>
+            <tr><th>#</th><th>Nombre</th><th>Especie</th><th>RUT del dueño</th></tr>
+          </thead>
+          <tbody>
+            ${mascotas.map((m, i) => `
+              <tr>
+                <td style="color:var(--gris-txt); font-family:monospace; font-size:0.8rem">${m.id}</td>
+                <td><strong>${m.nombre}</strong></td>
+                <td>${iconoEspecie[m.especie] || '🐾'} ${m.especie.charAt(0).toUpperCase() + m.especie.slice(1)}</td>
+                <td><span class="badge-rut">${m.rut}</span></td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+        <p style="margin-top:14px; font-size:0.82rem; color:var(--gris-txt)">
+          Total: ${mascotas.length} mascota(s) registrada(s)
+        </p>`;
+
+    } catch (err) {
+      const msg = err.response?.data?.error || 'Error al conectar con el servidor';
+      contenido.innerHTML = `<div class="empty"><div class="icon">⚠️</div><p>${msg}</p></div>`;
+      mostrarToast(msg, 'error');
+    }
+  }
+
+  cargarMascotas();
+</script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+ENTREGA MÓDULO 6: DESARROLLO DE APLICACIONES WEB
+
+📂 Proyecto: Ejercicio Práctico — Desarrollo de Portafolio
+
+REPOSITORIO GITHUB: 🔗 https://github.com/E-lizzy93/M-DULO-6-DESARROLLO-DE-APLICACIONES-WEB-NODE-EXPRESS-
+
+Carpeta: /M6-Ejercicio-Practico-Desarrollo-de-Portafolio-main
+
+Estructura del Proyecto:
+
+/data: Contiene los archivos de datos (JSON o texto) que alimentan la información dinámica del portafolio, como proyectos o habilidades.
+
+/public: Archivos estáticos del Frontend (HTML, CSS, imágenes y JS del lado del cliente) que dan vida a la interfaz visual del portafolio.
+
+server.js: Servidor principal de Node.js y Express encargado de servir la aplicación y gestionar las peticiones.
+
+package.json: Registro de dependencias instaladas y scripts de automatización para el proyecto.
+
+README.md: Documentación con los detalles técnicos y pasos para la ejecución del portafolio.

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buscar Mascota</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+
+<nav>
+  <div class="logo">🐾 Ministerio de las Mascotas <span>— Registro Civil</span></div>
+  <div class="nav-links">
+    <a href="/index.html">Inicio</a>
+    <a href="/mascotas.html">Mascotas</a>
+    <a href="/registrar.html">Registrar</a>
+    <a href="/buscar.html" class="activo">Buscar</a>
+    <a href="/eliminar.html">Eliminar</a>
+  </div>
+</nav>
+
+<div class="contenedor">
+
+  <!-- Buscar por nombre -->
+  <div class="panel">
+    <div class="panel-titulo">🔍 Buscar por nombre de mascota</div>
+    <div style="display:flex; gap:10px; align-items:flex-end;">
+      <div class="form-grupo" style="flex:1">
+        <label>Nombre</label>
+        <input type="text" id="buscar-nombre" placeholder="Ej: Firulais">
+      </div>
+      <button class="btn btn-azul" onclick="buscarPorNombre()">Buscar</button>
+    </div>
+    <div class="alerta" id="alerta-nombre"></div>
+    <div id="resultado-nombre"></div>
+  </div>
+
+  <!-- Buscar por RUT -->
+  <div class="panel">
+    <div class="panel-titulo">🔍 Buscar por RUT del dueño</div>
+    <div style="display:flex; gap:10px; align-items:flex-end;">
+      <div class="form-grupo" style="flex:1">
+        <label>RUT del dueño</label>
+        <input type="text" id="buscar-rut" placeholder="Ej: 12345678-9">
+      </div>
+      <button class="btn btn-azul" onclick="buscarPorRut()">Buscar</button>
+    </div>
+    <div class="alerta" id="alerta-rut"></div>
+    <div id="resultado-rut"></div>
+  </div>
+
+  <!-- Buscar por especie -->
+  <div class="panel">
+    <div class="panel-titulo">🔍 Buscar por especie</div>
+    <div style="display:flex; gap:10px; align-items:flex-end;">
+      <div class="form-grupo" style="flex:1">
+        <label>Especie</label>
+        <select id="buscar-especie" class="form-select">
+          <option value="">— Seleccionar —</option>
+          <option value="perro">🐕 Perro</option>
+          <option value="gato">🐈 Gato</option>
+          <option value="ave">🐦 Ave</option>
+          <option value="conejo">🐇 Conejo</option>
+          <option value="otro">🐾 Otro</option>
+        </select>
+      </div>
+      <button class="btn btn-azul" onclick="buscarPorEspecie()">Buscar</button>
+    </div>
+    <div class="alerta" id="alerta-especie"></div>
+    <div id="resultado-especie"></div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const iconoEspecie = { perro: '🐕', gato: '🐈', ave: '🐦', conejo: '🐇', otro: '🐾' };
+
+  function mostrarToast(texto, tipo = 'ok') {
+    const el = document.getElementById('toast');
+    el.textContent = texto;
+    el.className = `toast ${tipo} visible`;
+    setTimeout(() => el.classList.remove('visible'), 3500);
+  }
+
+  function mostrarAlerta(id, texto, tipo) {
+    const el = document.getElementById(id);
+    const iconos = { ok: '✅', error: '❌' };
+    el.innerHTML = `<span>${iconos[tipo]}</span> ${texto}`;
+    el.className = `alerta alerta-${tipo} visible`;
+  }
+
+  function renderTabla(mascotas) {
+    if (!Array.isArray(mascotas)) mascotas = [mascotas];
+    return `
+      <table style="margin-top:16px">
+        <thead><tr><th>ID Registro</th><th>Nombre</th><th>Especie</th><th>RUT del dueño</th></tr></thead>
+        <tbody>
+          ${mascotas.map(m => `
+            <tr>
+              <td style="font-family:monospace; font-size:0.8rem; color:var(--gris-txt)">${m.id}</td>
+              <td><strong>${m.nombre}</strong></td>
+              <td>${iconoEspecie[m.especie] || '🐾'} ${m.especie.charAt(0).toUpperCase() + m.especie.slice(1)}</td>
+              <td><span class="badge-rut">${m.rut}</span></td>
+            </tr>`).join('')}
+        </tbody>
+      </table>`;
+  }
+
+  async function buscarPorNombre() {
+    const nombre = document.getElementById('buscar-nombre').value.trim();
+    if (!nombre) { mostrarAlerta('alerta-nombre', 'Ingresa un nombre para buscar.', 'error'); return; }
+    try {
+      const res = await axios.get('/mascotas', { params: { nombre } });
+      document.getElementById('resultado-nombre').innerHTML = renderTabla(res.data);
+      document.getElementById('alerta-nombre').className = 'alerta';
+      mostrarToast(`Mascota "${nombre}" encontrada`, 'ok');
+    } catch (err) {
+      const msg = err.response?.data?.error || 'Error al conectar con el servidor';
+      mostrarAlerta('alerta-nombre', msg, 'error');
+      document.getElementById('resultado-nombre').innerHTML = '';
+    }
+  }
+
+  async function buscarPorRut() {
+    const rut = document.getElementById('buscar-rut').value.trim();
+    if (!rut) { mostrarAlerta('alerta-rut', 'Ingresa un RUT para buscar.', 'error'); return; }
+    try {
+      const res      = await axios.get('/mascotas', { params: { rut } });
+      const mascotas = res.data;
+      document.getElementById('resultado-rut').innerHTML = renderTabla(mascotas);
+      document.getElementById('alerta-rut').className = 'alerta';
+      mostrarToast(`${mascotas.length} mascota(s) encontrada(s)`, 'ok');
+    } catch (err) {
+      const msg = err.response?.data?.error || 'Error al conectar con el servidor';
+      mostrarAlerta('alerta-rut', msg, 'error');
+      document.getElementById('resultado-rut').innerHTML = '';
+    }
+  }
+
+  async function buscarPorEspecie() {
+    const especie = document.getElementById('buscar-especie').value;
+    if (!especie) { mostrarAlerta('alerta-especie', 'Selecciona una especie para buscar.', 'error'); return; }
+    try {
+      const res      = await axios.get('/mascotas', { params: { especie } });
+      const mascotas = res.data;
+      document.getElementById('resultado-especie').innerHTML = renderTabla(mascotas);
+      document.getElementById('alerta-especie').className = 'alerta';
+      mostrarToast(`${mascotas.length} mascota(s) de especie "${especie}" encontrada(s)`, 'ok');
+    } catch (err) {
+      const msg = err.response?.data?.error || 'Error al conectar con el servidor';
+      mostrarAlerta('alerta-especie', msg, 'error');
+      document.getElementById('resultado-especie').innerHTML = '';
+    }
+  }
+
+  // Enter en campos de texto
+  document.getElementById('buscar-nombre').addEventListener('keydown', e => { if (e.key === 'Enter') buscarPorNombre(); });
+  document.getElementById('buscar-rut').addEventListener('keydown',    e => { if (e.key === 'Enter') buscarPorRut(); });
+</script>
+</body>
+</html>

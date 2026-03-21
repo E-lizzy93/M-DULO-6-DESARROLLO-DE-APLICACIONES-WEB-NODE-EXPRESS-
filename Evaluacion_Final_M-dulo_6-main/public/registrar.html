@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registrar Mascota</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+
+<nav>
+  <div class="logo">🐾 Ministerio de las Mascotas <span>— Registro Civil</span></div>
+  <div class="nav-links">
+    <a href="/index.html">Inicio</a>
+    <a href="/mascotas.html">Mascotas</a>
+    <a href="/registrar.html" class="activo">Registrar</a>
+    <a href="/buscar.html">Buscar</a>
+    <a href="/eliminar.html">Eliminar</a>
+  </div>
+</nav>
+
+<div class="contenedor">
+  <div class="panel" style="max-width:560px; margin:0 auto;">
+    <div class="panel-titulo">➕ Registrar nueva mascota</div>
+
+    <div class="form-grid">
+      <div class="form-grupo">
+        <label>Nombre de la mascota</label>
+        <input type="text" id="nombre" placeholder="Ej: Firulais">
+      </div>
+      <div class="form-grupo">
+        <label>Especie</label>
+        <select id="especie" class="form-select">
+          <option value="">— Seleccionar —</option>
+          <option value="perro">🐕 Perro</option>
+          <option value="gato">🐈 Gato</option>
+          <option value="ave">🐦 Ave</option>
+          <option value="conejo">🐇 Conejo</option>
+          <option value="otro">🐾 Otro</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-grupo" style="margin-top:14px;">
+      <label>RUT del dueño</label>
+      <input type="text" id="rut" placeholder="Ej: 12345678-9">
+    </div>
+
+    <div style="margin-top:18px; display:flex; gap:10px;">
+      <button class="btn btn-azul" id="btn-registrar" onclick="registrar()">✅ Registrar mascota</button>
+      <a href="/mascotas.html" class="btn btn-outline">Ver listado</a>
+    </div>
+
+    <div class="alerta" id="alerta"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  function mostrarToast(texto, tipo = 'ok') {
+    const el = document.getElementById('toast');
+    el.textContent = texto;
+    el.className = `toast ${tipo} visible`;
+    setTimeout(() => el.classList.remove('visible'), 3500);
+  }
+
+  function mostrarAlerta(texto, tipo) {
+    const el = document.getElementById('alerta');
+    const iconos = { ok: '✅', error: '❌' };
+    el.innerHTML = `<span>${iconos[tipo]}</span> ${texto}`;
+    el.className = `alerta alerta-${tipo} visible`;
+  }
+
+  async function registrar() {
+    const nombre  = document.getElementById('nombre').value.trim();
+    const especie = document.getElementById('especie').value;
+    const rut     = document.getElementById('rut').value.trim();
+    const btn     = document.getElementById('btn-registrar');
+
+    if (!nombre || !especie || !rut) {
+      mostrarAlerta('Debes completar todos los campos incluyendo la especie.', 'error');
+      return;
+    }
+
+    btn.disabled    = true;
+    btn.textContent = '⏳ Registrando...';
+
+    try {
+      const res = await axios.post('/mascotas', { nombre, especie, rut });
+      const m   = res.data.mascota;
+      mostrarAlerta(`${m.nombre} (${m.especie}) registrado/a correctamente. ID: ${m.id}`, 'ok');
+      mostrarToast(`${m.nombre} registrado/a ✓`, 'ok');
+      document.getElementById('nombre').value  = '';
+      document.getElementById('especie').value = '';
+      document.getElementById('rut').value     = '';
+
+    } catch (err) {
+      const msg    = err.response?.data?.error || 'Error al conectar con el servidor';
+      const codigo = err.response?.status || '';
+      mostrarAlerta(`${msg}${codigo ? ` (${codigo})` : ''}`, 'error');
+      mostrarToast(msg, 'error');
+    } finally {
+      btn.disabled    = false;
+      btn.textContent = '✅ Registrar mascota';
+    }
+  }
+</script>
+</body>
+</html>
